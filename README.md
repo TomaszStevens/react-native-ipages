@@ -11,23 +11,32 @@ Quickly implement swipable page views in React Native!
 ## Example
 
 ```
+import React from "react";
+import { View } from "react-native";
 import IPages from 'react-native-ipages';
-import { View, Text } from "react-native";
 
-const Component_1 = () => (
-    <View style={{ backgroundColor: "red", height: "100%" }} />
+const App = () => {
+
+  const Component_1 = () => (
+    <View style={{ backgroundColor: "pink", height: "100%" }} />
   );
-const Component_2 = () => (
-  <View style={{ backgroundColor: "blue", height: "100%" }} />
-);
-const Component_3 = () => (
-  <View style={{ backgroundColor: "green", height: "100%" }} />
-);
+  const Component_2 = () => (
+    <View style={{ backgroundColor: "green", height: "100%" }} />
+  );
+  const Component_3 = () => (
+    <View style={{ backgroundColor: "teal", height: "100%" }} />
+  );
+  
+  return(
+    <IPages
+      components={[Component_1, Component_2, Component_3]}
+      dotsFocusedColor={"purple"}
+    />
+  );
+};
 
-<IPages 
-  components={[Component_1, Component_2, Component_1, Component_2]} 
-  dotsFocusedColor={"cyan"}
-/>
+export default App;
+
 ```
 
 ## Options
@@ -38,6 +47,6 @@ const Component_3 = () => (
 
 ### Optional
 
-* *dotsFocusedColor* - Colour of dot corresponding to current page. Any valid JavaScript colour.
-* *dotsUnfocusedColor* - Colour of dots corresponding to all pages other than the current. Any valid JavaScript colour.
-* *hideDots* - Hide the page indicator dots. `true`/`false`.
+* *dotsFocusedColor* - Colour of dot corresponding to current page. Any valid JavaScript colour (defaults to `"black"`).
+* *dotsUnfocusedColor* - Colour of dots corresponding to all pages other than the current. Any valid JavaScript colour (defaults to `"white"`).
+* *hideDots* - Hide the page indicator dots. `true`/`false` (defaults to `false`).
