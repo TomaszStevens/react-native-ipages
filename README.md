@@ -39,5 +39,5 @@ const Component_3 = () => (
 ### Optional
 
 * *dotsFocusedColor* - Colour of dot corresponding to current page. Any valid JavaScript colour.
-* *dotsFocusedColor* - Colour of dots corresponding to all pages other than the current. Any valid JavaScript colour.
+* *dotsUnfocusedColor* - Colour of dots corresponding to all pages other than the current. Any valid JavaScript colour.
 * *hideDots* - Hide the page indicator dots. `true`/`false`.

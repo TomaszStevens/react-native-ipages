@@ -1,0 +1,26 @@
+{
+  "name": "react-native-ipages",
+  "version": "1.0.0",
+  "description": "Quickly implement swipable page views in React Native!",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/TomaszStevens/react-native-ipages.git"
+  },
+  "keywords": [
+    "ipages",
+    "swipable",
+    "dots",
+    "indicator",
+    "pages"
+  ],
+  "author": "Tomasz Stevens",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/TomaszStevens/react-native-ipages/issues"
+  },
+  "homepage": "https://github.com/TomaszStevens/react-native-ipages#readme"
+}
