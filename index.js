@@ -26,6 +26,7 @@ const IPages = ({
   };
 
   useEffect(() => {
+    if (!infiniteScroll) return;
     scrollView.current.scrollTo({
       x: width * NUM_PAGES,
       y: 0,
