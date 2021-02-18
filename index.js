@@ -13,7 +13,7 @@ const IPages = ({
       "Components prop must be non-empty array of react-native components."
     );
   const NUM_PAGES = components.length;
-  const WIDTH = Dimensions.get("window").width;
+  const [width, setWidth] = useState(Dimensions.get("window").width);
   const [currentPage, setCurrentPage] = useState(0);
   const scrollView = useRef();
 
@@ -21,9 +21,21 @@ const IPages = ({
     ? [...components, ...components, ...components]
     : components;
 
+  const onLayout = (e) => {
+    setWidth(e.nativeEvent.layout.width);
+  };
+
+  useEffect(() => {
+    scrollView.current.scrollTo({
+      x: width * NUM_PAGES,
+      y: 0,
+      animated: false,
+    });
+  }, [width]);
+
   const onScroll = (e) => {
     let offset_x = e.nativeEvent.contentOffset.x;
-    let closestPageIndex = Math.round(offset_x / WIDTH);
+    let closestPageIndex = Math.round(offset_x / width);
     if (closestPageIndex !== currentPage) setCurrentPage(closestPageIndex);
   };
 
@@ -31,27 +43,18 @@ const IPages = ({
     if (!infiniteScroll) return;
     if (currentPage < NUM_PAGES || currentPage >= NUM_PAGES * 2)
       scrollView.current.scrollTo({
-        x: WIDTH * (NUM_PAGES + (currentPage % NUM_PAGES)),
+        x: width * (NUM_PAGES + (currentPage % NUM_PAGES)),
         y: 0,
         animated: false,
       });
   };
-
-  useEffect(() => {
-    if (!infiniteScroll) return;
-    scrollView.current.scrollTo({
-      x: WIDTH * NUM_PAGES,
-      y: 0,
-      animated: false,
-    });
-  }, []);
 
   const Dots = () => (
     <View
       style={{
         position: "absolute",
         alignSelf: "center",
-        bottom: 30,
+        bottom: "3.7%",
         flexDirection: "row",
         justifyContent: "center",
       }}
@@ -80,8 +83,8 @@ const IPages = ({
     <>
       <ScrollView
         horizontal
-        style={{ width: "100%", height: "100%", backgroundColor: "pink" }}
-        // snapToInterval={WIDTH}
+        style={{ width: "100%", height: "100%" }}
+        pagingEnabled={true}
         bounces={false}
         decelerationRate={"fast"}
         showsHorizontalScrollIndicator={false}
@@ -90,10 +93,10 @@ const IPages = ({
         scrollEventThrottle={4}
         ref={scrollView}
         onMomentumScrollEnd={onMomentumScrollEnd}
-        pagingEnabled={true}
+        onLayout={onLayout}
       >
         {componentsToRender.map((component, i) => (
-          <View key={i} style={{ width: WIDTH, height: "100%" }}>
+          <View key={i} style={{ width: width, height: "100%" }}>
             {component()}
           </View>
         ))}
