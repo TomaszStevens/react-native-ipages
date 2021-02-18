@@ -31,7 +31,7 @@ const App = () => {
     <IPages
       components={[Component_1, Component_2, Component_3]}
       dotsFocusedColor={"purple"}
-      infiniteScrolling
+      infiniteScroll
     />
   );
 };
