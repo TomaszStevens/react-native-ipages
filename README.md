@@ -31,6 +31,7 @@ const App = () => {
     <IPages
       components={[Component_1, Component_2, Component_3]}
       dotsFocusedColor={"purple"}
+      infiniteScroll
     />
   );
 };
@@ -50,3 +51,4 @@ export default App;
 * *dotsFocusedColor* - Colour of dot corresponding to current page. Any valid JavaScript colour (defaults to `"black"`).
 * *dotsUnfocusedColor* - Colour of dots corresponding to all pages other than the current. Any valid JavaScript colour (defaults to `"white"`).
 * *hideDots* - Hide the page indicator dots. `true`/`false` (defaults to `false`).
+* *infiniteScroll* - Allows for infinite scrolling. `true`/`false` (defaults to `false`).
