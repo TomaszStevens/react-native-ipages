@@ -1,6 +1,6 @@
 {
   "name": "react-native-ipages",
-  "version": "1.0.4",
+  "version": "1.0.5",
   "description": "Quickly implement swipable page views in React Native!",
   "main": "index.js",
   "scripts": {
