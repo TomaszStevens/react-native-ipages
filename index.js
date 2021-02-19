@@ -1,176 +1,110 @@
-import React, { useState } from "react";
-import { Dimensions, StyleSheet, View } from "react-native";
-import Animated, {
-  useSharedValue,
-  useAnimatedStyle,
-  useAnimatedScrollHandler,
-  useAnimatedRef,
-  interpolate,
-  Extrapolate,
-} from "react-native-reanimated";
-import { getStatusBarHeight } from "react-native-status-bar-height";
+import React, { useEffect, useRef, useState } from "react";
+import { Dimensions, ScrollView, View } from "react-native";
 
-const ScrolloverView = ({
-  topContent,
-  bottomContent,
-  footerContent,
-  hiddenTopContent,
-  backgroundColor,
-  statusBarBackgroundColor,
-  footerBackgroundColor,
+const IPages = ({
+  dotsFocusedColor,
+  dotsUnfocusedColor,
+  hideDots,
+  components,
+  infiniteScroll,
 }) => {
-  const [hasLaidOut, setHasLaidOut] = useState(false);
+  if (!Array.isArray(components) || components.length === 0)
+    throw new Error(
+      "Components prop must be non-empty array of react-native components."
+    );
+  const NUM_PAGES = components.length;
+  const [width, setWidth] = useState(Dimensions.get("window").width);
+  const [currentPage, setCurrentPage] = useState(0);
+  const scrollView = useRef();
 
-  const SCREEN_HEIGHT = useSharedValue(Dimensions.get("window").height);
-  const STATUS_BAR_HEIGHT = useSharedValue(getStatusBarHeight());
+  const componentsToRender = infiniteScroll
+    ? [...components, ...components, ...components]
+    : components;
 
-  const TOP_CONTENT_HEIGHT = useSharedValue(0);
-  const BOTTOM_CONTENT_HEIGHT = useSharedValue(0);
-
-  const onLayoutTopContent = (e) => {
-    TOP_CONTENT_HEIGHT.value = e.nativeEvent.layout.height;
-    setHasLaidOut(true); // Required to force rerender of hidden content to correct position
+  const onLayout = (e) => {
+    setWidth(e.nativeEvent.layout.width);
   };
-  const onLayoutBottomContent = (e) => {
-    BOTTOM_CONTENT_HEIGHT.value = e.nativeEvent.layout.height;
+
+  useEffect(() => {
+    if (!infiniteScroll) return;
+    scrollView.current.scrollTo({
+      x: width * NUM_PAGES,
+      y: 0,
+      animated: false,
+    });
+  }, [width]);
+
+  const onScroll = (e) => {
+    let offset_x = e.nativeEvent.contentOffset.x;
+    let closestPageIndex = Math.round(offset_x / width);
+    if (closestPageIndex !== currentPage) setCurrentPage(closestPageIndex);
   };
 
-  const translationY = useSharedValue(0);
-  const scrollView = useAnimatedRef();
+  const onMomentumScrollEnd = () => {
+    if (!infiniteScroll) return;
+    if (currentPage < NUM_PAGES || currentPage >= NUM_PAGES * 2)
+      scrollView.current.scrollTo({
+        x: width * (NUM_PAGES + (currentPage % NUM_PAGES)),
+        y: 0,
+        animated: false,
+      });
+  };
 
-  const scrollHandler = useAnimatedScrollHandler((e) => {
-    translationY.value = e.contentOffset.y;
-  });
-
-  const topContentStyle = useAnimatedStyle(() => {
-    return {
-      transform: [
-        {
-          translateY: translationY.value,
-        },
-      ],
-    };
-  });
-
-  const footerStyle = useAnimatedStyle(() => {
-    let DISTANCE_TO_BOTTOM =
-      BOTTOM_CONTENT_HEIGHT.value -
-      (SCREEN_HEIGHT.value -
-        TOP_CONTENT_HEIGHT.value -
-        STATUS_BAR_HEIGHT.value);
-
-    return {
-      top: 50,
-      opacity: interpolate(
-        translationY.value,
-        [DISTANCE_TO_BOTTOM + 20, DISTANCE_TO_BOTTOM + 120],
-        [0, 1],
-        Extrapolate.CLAMP
-      ),
-      transform: [
-        {
-          translateY: interpolate(
-            translationY.value,
-            [DISTANCE_TO_BOTTOM + 20, DISTANCE_TO_BOTTOM + 260],
-            [-60, 60],
-            Extrapolate.CLAMP
-          ),
-        },
-      ],
-    };
-  });
-
-  const StatusBar = () => (
+  const Dots = () => (
     <View
       style={{
-        height: STATUS_BAR_HEIGHT.value,
-        backgroundColor: statusBarBackgroundColor ?? backgroundColor,
+        position: "absolute",
+        alignSelf: "center",
+        bottom: "3.7%",
+        flexDirection: "row",
+        justifyContent: "center",
       }}
-    />
-  );
-
-  const Footer = () => (
-    <>
-      {footerContent && (
-        <View
-          style={{
-            ...styles.footer,
-            backgroundColor: footerBackgroundColor ?? backgroundColor,
-          }}
-        >
-          {<Animated.View style={footerStyle}>{footerContent()}</Animated.View>}
-        </View>
-      )}
-    </>
-  );
-
-  const Content = () => (
-    <>
-      {topContent && (
-        <Animated.View style={topContentStyle} onLayout={onLayoutTopContent}>
+    >
+      {Array(NUM_PAGES)
+        .fill(0)
+        .map((_, i) => (
           <View
+            key={i}
             style={{
-              height: STATUS_BAR_HEIGHT.value,
-              backgroundColor: statusBarBackgroundColor ?? backgroundColor,
+              height: 5,
+              width: 5,
+              borderRadius: 3,
+              backgroundColor:
+                currentPage % NUM_PAGES === i
+                  ? dotsFocusedColor ?? "black"
+                  : dotsUnfocusedColor ?? "white",
+              margin: 5,
             }}
           />
-          {topContent()}
-        </Animated.View>
-      )}
-      {bottomContent && (
-        <View onLayout={onLayoutBottomContent}>{bottomContent()}</View>
-      )}
-    </>
-  );
-
-  const HiddenTopContent = () => (
-    <>
-      {hiddenTopContent && hasLaidOut && (
-        <View
-          style={{
-            ...styles.hiddenTopContent,
-            top: STATUS_BAR_HEIGHT.value + TOP_CONTENT_HEIGHT.value,
-          }}
-        >
-          {hiddenTopContent()}
-        </View>
-      )}
-    </>
+        ))}
+    </View>
   );
 
   return (
-    <View style={{ ...styles.container, backgroundColor }}>
-      <HiddenTopContent />
-      <Animated.ScrollView
+    <>
+      <ScrollView
+        horizontal
+        style={{ width: "100%", height: "100%" }}
+        pagingEnabled={true}
+        bounces={false}
+        decelerationRate={"fast"}
+        showsHorizontalScrollIndicator={false}
+        disableIntervalMomentum={true}
+        onScroll={onScroll}
+        scrollEventThrottle={4}
         ref={scrollView}
-        onScroll={scrollHandler}
-        scrollEventThrottle={16}
-        showsVerticalScrollIndicator={false}
+        onMomentumScrollEnd={onMomentumScrollEnd}
+        onLayout={onLayout}
       >
-        {/* <StatusBar /> */}
-        <Footer />
-        <Content />
-      </Animated.ScrollView>
-    </View>
+        {componentsToRender.map((component, i) => (
+          <View key={i} style={{ width: width, height: "100%" }}>
+            {component()}
+          </View>
+        ))}
+      </ScrollView>
+      {!hideDots && <Dots />}
+    </>
   );
 };
 
-const styles = StyleSheet.create({
-  container: {
-    height: "100%",
-    width: "100%",
-  },
-  hiddenTopContent: {
-    position: "absolute",
-    alignItems: "center",
-    width: "100%",
-  },
-  footer: {
-    width: "100%",
-    height: 400,
-    position: "absolute",
-    bottom: -350,
-  },
-});
-
-export default ScrolloverView;
+export default IPages;
